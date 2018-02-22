@@ -15,6 +15,7 @@ from sklearn import linear_model
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
+from sklearn.decomposition import PCA
 
 
 # =============================================================================
@@ -23,7 +24,7 @@ from sklearn.metrics import confusion_matrix
 
 # IMPORT 
 # =============================================================================
-def import_ct(n_sample=1000, random=1, shuffle=True):
+def import_ct(n_sample, random=1, shuffle=True):
     """Import 'cover types' database and prepare it."""
     # 'n_sample' can be either a float < 1 (proportion of observations) or an
     # int > 1 (number of observations), random is the seed (or False)
@@ -33,9 +34,9 @@ def import_ct(n_sample=1000, random=1, shuffle=True):
     Y = df.target[0:idx_max]
     print(df.DESCR)
     print('####################################################')
-    print('Array des variables explicatives ({:.3f}% du dataset original) : {}'
+    print('Array des variables explicatives ({:.2f}% du dataset original) : {}'
             .format(idx_max/len(df.target)*100, X.shape))
-    print('Array des labels ({:.3f}% du dataset original) : {}'
+    print('Array des labels ({:.2f}% du dataset original) : {}'
             .format(idx_max/len(df.target)*100, Y.shape))
 
     return X, Y
@@ -77,16 +78,17 @@ def to_df(X, Y, qualitatif=False):
     return df
 
 
-# PRE PROCESSING : split, reduction etc
+# PRE PROCESSING : split, normalisation, reduction etc
 # =============================================================================
-def split(X, Y, test_ratio=0.2, random=1):
+def split(X, Y, test_ratio=0.2, random=1, strat=True):
     """Split the DB in training set and test set, given the ratio."""
     Xa, Xt, Ya ,Yt = train_test_split(X, Y, shuffle=True, test_size=test_ratio,
-                                      stratify=Y, random_state=random)
+                                      stratify=Y if strat else None,
+                                      random_state=random)
     return Xa, Xt, Ya, Yt
 
 
-def reduction(Xa, Xt, param_mean=True, param_std=True):
+def norma(Xa, Xt, param_mean=True, param_std=True):
     """Centrage et normalisation"""
     sc = StandardScaler(with_mean=param_mean, with_std=param_std)
     sc = sc.fit(Xa)
@@ -95,10 +97,26 @@ def reduction(Xa, Xt, param_mean=True, param_std=True):
     return Xa, Xt
 
 
+# Réduction de dimension
+def pca(Xa, Xt, nb_var=3, alamano=True):
+    pca = PCA(n_components=nb_var)
+    pca.fit(Xa)
+    for i in range(nb_var):
+        print("Valeur propre n°{:d} : {:.1f}% de variance expliquée (lambda = {:.2f})"
+              .format(i,
+                      100*pca.explained_variance_ratio_[i],
+                      pca.singular_values_[i]))
+    if alamano:
+        print()
+
+    return pca.transform(Xa), pca.transform(Xt)
+
+
 # MODELES ML
 # =============================================================================
+# Classification
 def lda(Xa, Xt, Ya, Yt):
-    Xa, Xt = reduction(Xa, Xt)
+    Xa, Xt = norma(Xa, Xt)
     model_lda = LinearDiscriminantAnalysis(solver='svd', store_covariance=True)
     model_lda.fit(Xa, Ya)
     Y_lda = model_lda.predict(Xa)
@@ -107,7 +125,7 @@ def lda(Xa, Xt, Ya, Yt):
     return err_lda
 
 def qda(Xa, Xt, Ya, Yt):
-    Xa, Xt = reduction(Xa, Xt)
+    Xa, Xt = norma(Xa, Xt)
     model_qda = QuadraticDiscriminantAnalysis(store_covariance=True)
     model_qda.fit(Xa, Ya)
     # print(model_qda.means_)
@@ -123,13 +141,12 @@ def reg_log(Xa, Xt, Ya, Yt, size_vec_C=10, p_cla='multinomial', p_sol='lbfgs'):
 
     # Optimisation param
     Xaa, Xav, Yaa, Yav = split(Xa, Ya, test_ratio=0.2)
-    Xaa, Xav = reduction(Xaa, Xav)
+    Xaa, Xav = norma(Xaa, Xav)
     model_reglog = linear_model.LogisticRegression(tol=1e-5,
                                                    multi_class=p_cla,
                                                    solver=p_sol) 
     vectC_log = np.logspace(-3, 2, size_vec_C)
     e_aa_log = np.empty(vectC_log.shape[0])
-    print(e_aa_log)
     e_av_log = np.empty(vectC_log.shape[0])
     for ind_C, C in enumerate(vectC_log):
         model_reglog.C = C
@@ -164,7 +181,7 @@ def reg_log(Xa, Xt, Ya, Yt, size_vec_C=10, p_cla='multinomial', p_sol='lbfgs'):
     # Entrainement du modele sur toutes les donnees d'apprentissage et
     # évaluation des perf sur jeu de test
     model_reglog.C = Copt
-    Xa, Xt = reduction(Xa, Xt)
+    Xa, Xt = norma(Xa, Xt)
     model_reglog.fit(Xa, Ya)
     err_app = 1 - accuracy_score(Ya, model_reglog.predict(Xa))
     print("\nRegression logistique optimal : erreur apprentissage = {}".format( err_app))
@@ -180,18 +197,79 @@ def reg_log(Xa, Xt, Ya, Yt, size_vec_C=10, p_cla='multinomial', p_sol='lbfgs'):
     plt.show()
 
 
+# Regression
+def reg_lin(Xa, Xt, Ya, Yt):
+    """Regression linéaire."""
+    model_reg_lin = linear_model.LinearRegression(fit_intercept=True,
+                                                          normalize=False,
+                                                          copy_X=True,
+                                                          n_jobs=1)
+    model_reg_lin.fit(Xa, Ya)
+    print(np.c_[Yt, model_reg_lin.predict(Xt)])
+    print(model_reg_lin.score(Xt, Yt))
 
 
-# Main
+def reg_ridge(Xa, Xt, Ya, Yt):
+    model_reg_ridge = linear_model.Ridge(alpha=1.0,
+                                         fit_intercept=True,
+                                         normalize=False,
+                                         copy_X=True,
+                                         max_iter=None,
+                                         tol=0.001,
+                                         solver='auto',
+                                         random_state=None)
+    model_reg_ridge.fit(Xa, Ya)
+    print(np.c_[Yt, model_reg_ridge.predict(Xt)])
+    print(model_reg_ridge.score(Xt, Yt))
+
+
+def reg_lasso(Xa, Xt, Ya, Yt):
+    model_reg_lasso = linear_model.Lasso(alpha=0.1)
+    model_reg_lasso.fit(Xa, Ya)
+    print(model_reg_lasso.coef_)
+    print(model_reg_lasso.intercept_)
+
+
+# AUTRES
+# =============================================================================
+def repartition_classes(Y):
+    rep = np.unique(Y, return_counts=True)
+    for i in range(len(rep[0])):
+        print("Classe {:d} : {:d} unités ({:.1f}%)"
+              .format(rep[0][i],
+                      rep[1][i],
+                      rep[1][i] / len(Y) * 100))
+
+
+# MAIN
+# =============================================================================
 if __name__ == '__main__':
-    # All DB imported, to keep the label proportions of the dataset
+    # !!!! ALL DB imported, to keep the label proportions of the dataset
     X, Y = import_ct(n_sample=1, random=2)
-    df = to_df(X, Y, qualitatif=True)
-    df.info()
-    X = X[:, 0:2]
+    #df = to_df(X, Y, qualitatif=True)
+    X = X[:, 0:10]
     X_jete, X, Y_jete, Y = split(X, Y, test_ratio=0.01)
+    repartition_classes(Y)
+    del(X_jete, Y_jete)
+    print(pd.DataFrame(X).describe().round(decimals=2)) # stats basiques sur X
 
-    Xa, Xt, Ya, Yt = split(X, Y, test_ratio=0.2)
-    # lda(Xa, Xt, Ya, Yt)
-    # qda(Xa, Xt, Ya, Yt)
-    reg_log(Xa, Xt, Ya, Yt, size_vec_C=15, p_cla='multinomial', p_sol='lbfgs')
+# Test des selections
+    if True:
+        Xa, Xt, Ya, Yt = split(X, Y, test_ratio=0.5)
+        Xa, Xt = pca(Xa, Xt, 5)
+
+# Test des classifications
+    if True:
+        # Xa, Xt, Ya, Yt = split(X, Y, test_ratio=0.2)
+        lda(Xa, Xt, Ya, Yt)
+        qda(Xa, Xt, Ya, Yt)
+        # reg_log(Xa, Xt, Ya, Yt, size_vec_C=15, p_cla='multinomial', p_sol='lbfgs')
+
+# Test des regressions
+    if False:
+        X_reg = np.c_[X[:, 1:10], Y]
+        Y_reg = X[:, 0]
+        Xa, Xt, Ya, Yt = split(X_reg, Y_reg, test_ratio=0.2, strat=False)
+        reg_lin(Xa, Xt, Ya, Yt)
+        reg_ridge(Xa, Xt, Ya, Yt)
+        reg_lasso(Xa, Xt, Ya, Yt)
