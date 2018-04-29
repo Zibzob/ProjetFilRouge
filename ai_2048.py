@@ -22,7 +22,7 @@ from lasagne.layers import DenseLayer, InputLayer, batch_norm, DropoutLayer
 from lasagne.layers import  MergeLayer, ReshapeLayer, FlattenLayer, ConcatLayer
 from lasagne.nonlinearities import rectify, elu, softmax, sigmoid
 from lasagne.init import Constant, Sparse
-from lasagne.layers.dnn import Conv2DDNNLayer
+#from lasagne.layers.dnn import Conv2DDNNLayer
 from lasagne.regularization import regularize_network_params, l1, l2, regularize_layer_params_weighted
 
 #floatX = theano.config.floatX # en rapport avec la carte graphique
@@ -66,7 +66,6 @@ params = lasagne.layers.get_all_params(l_out, trainable=True)
 updates = lasagne.updates.adam(loss, params, beta1=0.5)
 #updates = lasagne.updates.sgd(loss, params, learning_rate=α)
 #updates = lasagne.updates.adamax(loss, params)
-
 
 train_fn = theano.function([input_var, target_var], loss, updates=updates)
 loss_fn = theano.function([input_var, target_var], loss)
@@ -215,17 +214,3 @@ for j in range(200):
     plt.pause(3)
     if result[1] >= 2048:
         break
-
-
-
-
-
-
-
-
-
-
-
-
-
-

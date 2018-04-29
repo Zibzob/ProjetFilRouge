@@ -156,6 +156,9 @@ def print_grid(grid_array):
         print("|{}|".format(meat))
         print(wall)
 
+def plot_grid(grid_array):
+    pass
+
 class Game:
     def __init__(self, cols=4, rows=4):
         self.grid_array = np.zeros(shape=(rows, cols), dtype='uint16')
@@ -206,12 +209,14 @@ class Game:
 
 def random_play(game):
     moves = [0,1,2,3]
+    moves_count = 0
     while not game.end:
+        moves_count += 1
         shuffle(moves)
         for m in moves:
             if game.move(m):
                     break    
-    return game.score
+    return game.score, moves_count
 
 # MAIN
 # =============================================================================
