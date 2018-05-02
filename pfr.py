@@ -17,7 +17,13 @@ def stat_random_games(n):
     score = []
     count = []
     max_tile = []
+    memoire = 0
     for i in range(n):
+        avancement = i*100//n
+        if avancement != memoire:
+            memoire = avancement
+            print(avancement, "% effectués")
+            print(len(score), len(count), len(max_tile))
         game = jeu.Game()
         s, c = jeu.random_play(game)
         score.append(s)
@@ -51,18 +57,18 @@ def stat_random_games(n):
     # Print and save
     plt.tight_layout()
     t = datetime.now()
-    plt.show()
-    plt.savefig('/home/aurelien/Pictures/pfr/RandGameStats_{}_{}_{}_{}.png'.
+    #plt.show()
+    #plt.savefig('/home/aurelien/Pictures/pfr/RandGameStats_{}_{}_{}_{}.png'.
+    plt.savefig('/home/afebvre/RandGameStats_{}_{}_{}_{}.png'.
                 format(t.day, t.hour, t.minute, t.second),
-                dpi='figure',
-                transparent=False)
-    plt.close('all')
+                dpi='figure')
+    #            transparent=False)
+    #plt.close('all')
 
 
 # MAIN
 # =============================================================================
 if __name__ == '__main__':
-
     t1 = time.time()
-    stat_random_games(10000)
+    stat_random_games(100000)
     print("Temps écoulé : ", (time.time() - t1) / 60, ' minutes')

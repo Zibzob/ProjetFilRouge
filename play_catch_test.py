@@ -24,21 +24,22 @@ if __name__ == "__main__":
         # get initial input
         input_t = env.observe()
 
-        plt.imshow(input_t.reshape((grid_size,)*2),
-                   interpolation='none', cmap='gray')
-        plt.savefig("%03d.png" % c)
+        #plt.imshow(input_t.reshape((grid_size,)*2),
+        #           interpolation='none', cmap='gray')
+        #plt.savefig("%03d.png" % c)
         c += 1
         while not game_over:
             input_tm1 = input_t
 
             # get next action
             q = model.predict(input_tm1)
+            print(q)
             action = np.argmax(q[0])
 
             # apply action, get rewards and new state
             input_t, reward, game_over = env.act(action)
 
-            plt.imshow(input_t.reshape((grid_size,)*2),
-                       interpolation='none', cmap='gray')
-            plt.savefig("%03d.png" % c)
+            #plt.imshow(input_t.reshape((grid_size,)*2),
+            #           interpolation='none', cmap='gray')
+            #plt.savefig("%03d.png" % c)
             c += 1

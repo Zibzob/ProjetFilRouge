@@ -3,6 +3,7 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers.core import Dense
 from keras.optimizers import sgd
+import jeu_2048
 
 
 class Catch(object):
@@ -138,26 +139,27 @@ class ExperienceReplay(object):
 
 if __name__ == "__main__":
     # parameters
-    epsilon = .1  # exploration
-    num_actions = 3  # [move_left, stay, move_right]
-    epoch = 100
+    epsilon = .3  # exploration
+    num_actions = 4  # [move_left, stay, move_right]
+    epoch = 500
     max_memory = 500
     hidden_size = 100
     batch_size = 50
-    grid_size = 10
+    grid_size = 4
 
     # Modèle DNL
     model = Sequential()
     model.add(Dense(hidden_size, input_shape=(grid_size**2,), activation='relu'))
     model.add(Dense(hidden_size, activation='relu'))
-    model.add(Dense(num_actions))
+    model.add(Dense(num_actions, activation='softmax'))
     model.compile(sgd(lr=.2), "mse")
 
     # If you want to continue training from a previous model, just uncomment the line bellow
-    #model.load_weights("model.h5")
+    model.load_weights("model_2048.h5")
 
     # Define environment/game
-    env = Catch(grid_size)
+    #env = Catch(grid_size)
+    env = jeu_2048.Game()
 
     # Initialize experience replay object
     exp_replay = ExperienceReplay(max_memory=max_memory)
@@ -166,7 +168,7 @@ if __name__ == "__main__":
     win_cnt = 0
     for e in range(epoch):
         loss = 0.
-        env.reset()
+        #env.reset()
         game_over = False
         # get initial input
         input_t = env.observe()
@@ -178,14 +180,12 @@ if __name__ == "__main__":
                 action = np.random.randint(0, num_actions, size=1)
             else:
                 q = model.predict(input_tm1)
-                print(input_tm1)
-                print(q)
                 action = np.argmax(q[0])
 
             # apply action, get rewards and new state
             input_t, reward, game_over = env.act(action)
-            if reward == 1:
-                win_cnt += 1
+            #if reward == 1:
+            #    win_cnt += 1
 
             # store experience
             exp_replay.remember([input_tm1, action, reward, input_t], game_over)
@@ -197,6 +197,6 @@ if __name__ == "__main__":
         print("Epoch {:03d}/{} | Loss {:.4f} | Win count {}".format(e+1, epoch, loss, win_cnt))
 
     # Save trained model weights and architecture, this will be used by the visualization code
-    model.save_weights("model.h5", overwrite=True)
-    with open("model.json", "w") as outfile:
+    model.save_weights("model_2048.h5", overwrite=True)
+    with open("model_2048.json", "w") as outfile:
         json.dump(model.to_json(), outfile)

@@ -161,7 +161,8 @@ def plot_grid(grid_array):
 
 class Game:
     def __init__(self, cols=4, rows=4):
-        self.grid_array = np.zeros(shape=(rows, cols), dtype='uint16')
+        #self.grid_array = np.zeros(shape=(rows, cols), dtype='uint16')
+        self.grid_array = np.zeros(shape=(rows, cols), dtype='float')
         self.grid = self.grid_array
         for i in range(2):
             put_new_cell(self.grid)
@@ -207,6 +208,25 @@ class Game:
     def display(self):
         print_grid(self.grid_array)
 
+    def observe(self):
+        """Returns the current state of the grid in a flat array"""
+        canvas = self.grid
+        return canvas.reshape((1, -1))
+
+    def _get_reward(self):
+        if any_possible_moves(self.grid):
+            return self.score
+        else:
+            return -1000
+
+    def act(self, action):
+        self.move(action)
+        reward = self._get_reward()
+        game_over = not(any_possible_moves(self.grid))
+        return self.observe(), reward, game_over
+
+
+
 def random_play(game):
     moves = [0,1,2,3]
     moves_count = 0
@@ -222,4 +242,3 @@ def random_play(game):
 # =============================================================================
 if __name__ == '__main__':
     game = Game()
-    print(random_play(game))
