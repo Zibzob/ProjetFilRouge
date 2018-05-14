@@ -11,9 +11,12 @@ import seaborn as sns
 if __name__ == "__main__":
     # Make sure this grid size matches the value used fro training
 
-    with open("model_2048.json", "r") as jfile:
+    nb_hidden_layer = 2
+    hidden_layer_size = 100
+    model_name = "model_2048_{}_{}".format(nb_hidden_layer, hidden_layer_size)
+    with open(model_name + ".json", "r") as jfile:
         model = model_from_json(json.load(jfile))
-    model.load_weights("model_2048.h5")
+    model.load_weights(model_name + ".h5")
     model.compile("sgd", "mse")
 
     # Define environment, game
@@ -29,8 +32,9 @@ if __name__ == "__main__":
 
         cnt = 0
         mem_action = -1
-        cnt_action = 0
+        cnt_action = 1
         bloque = False
+        stat_blocked = 0
         while not game_over:
             input_tm1 = input_t
 
@@ -38,7 +42,8 @@ if __name__ == "__main__":
             q = model.predict(input_tm1)
             #action = np.argmax(q[0])
             action = np.argmax(q)
-            if cnt_action > 4:
+            if cnt_action >= 2:
+                stat_blocked += 1
                 action = randint(0, 3)
                 cnt_action = 0
             if action == mem_action:
@@ -56,6 +61,8 @@ if __name__ == "__main__":
         score.append(s)
         max_tile.append(max_t)
         count.append(cnt)
+        print("Nombre de random pour debloquer = {} (sur {} actions --> {}%)".
+        format(stat_blocked, cnt, round(stat_blocked/cnt * 100, 1)))
 
     # Plots and stats
     f = plt.figure("Res random", figsize=(8, 6), dpi=400)
@@ -84,9 +91,10 @@ if __name__ == "__main__":
     plt.tight_layout()
     t = datetime.now()
     #plt.show()
-    #plt.savefig('/home/aurelien/Pictures/pfr/RandGameStats_{}_{}_{}_{}.png'.
-    plt.savefig('/home/afebvre/RL_bot_Stats_vers01{}_{}_{}_{}.png'.
-                format(t.day, t.hour, t.minute, t.second),
+    #plt.savefig('/home/aurelien/Pictures/pfr/RandGameStats_{}_{}_{}_{}.png'
+    plt.savefig('/home/aurelien/Documents/CoursINSA/PFR/Image_res_bots/RL_bot_Stats_vers_{}_{}_{}_{}_{}_{}.png'.
+                format(nb_hidden_layer, hidden_layer_size, t.day, t.hour,
+                t.minute, t.second),
                 dpi='figure')
     #            transparent=False)
     #plt.close('all')

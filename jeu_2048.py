@@ -167,6 +167,9 @@ class Game:
         for i in range(2):
             put_new_cell(self.grid)
         self.score = 0
+        self.diff_score = 0 # score de l'action, a ajouter au score global
+        self.memory_action = -1
+        self.same_move = False
         self.end = False
     
     def copy(self):
@@ -198,9 +201,17 @@ class Game:
                 score = push_right(self.grid)
             else:
                 score = push_left(self.grid)
+        if direction == self.memory_action:
+            self.same_move = True
+        else:
+            self.same_move = False
+        self.memory_action = direction
+        # gestion score et game over
+        self.score += score
+        self.diff_score = score
+        # print(score)
         if score == -1:
             return 0
-        self.score += score
         if not prepare_next_turn(self.grid):
             self.end = True
         return 1
@@ -215,7 +226,7 @@ class Game:
 
     def _get_reward(self):
         if any_possible_moves(self.grid):
-            return self.score
+            return self.diff_score if not self.same_move else self.diff_score - 1
         else:
             return -1000
 
@@ -224,8 +235,6 @@ class Game:
         reward = self._get_reward()
         game_over = not(any_possible_moves(self.grid))
         return self.observe(), reward, game_over
-
-
 
 def random_play(game):
     moves = [0,1,2,3]
@@ -242,3 +251,4 @@ def random_play(game):
 # =============================================================================
 if __name__ == '__main__':
     game = Game()
+    random_play(game)

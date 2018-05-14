@@ -192,6 +192,7 @@ if __name__ == "__main__":
 
             # adapt model --> apprentissage (memory) ?
             inputs, targets = exp_replay.get_batch(model, batch_size=batch_size)
+            print(targets)
 
             loss += model.train_on_batch(inputs, targets)#[0]
         print("Epoch {:03d}/{} | Loss {:.4f} | Win count {}".format(e+1, epoch, loss, win_cnt))

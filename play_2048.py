@@ -99,7 +99,7 @@ class ExperienceReplay(object):
     #   - max memory
     #   - memory --> [[state_t, action_t, reward_t, state_t+1], game_over?]
     #   - discount ?
-    def __init__(self, max_memory=100, discount=.9):
+    def __init__(self, max_memory=100, discount=.5):
         self.max_memory = max_memory
         self.memory = list() # liste des states successifs jusqu'à game over
         self.discount = discount
@@ -134,69 +134,82 @@ class ExperienceReplay(object):
             else:
                 # reward_t + gamma * max_a' Q(s', a')
                 targets[i, action_t] = reward_t + self.discount * Q_sa
+        #print(targets)
         return inputs, targets
 
 
 if __name__ == "__main__":
     # parameters
-    epsilon = .3  # exploration
-    num_actions = 4  # [move_left, stay, move_right]
-    epoch = 500
+    epsilon = .1  # exploration
+    num_actions = 4  # [gauche, haut, droite, bas]
+    epoch = 10
     max_memory = 500
-    hidden_size = 100
-    batch_size = 50
+    nb_hidden_layer = 2
+    hidden_layer_size = 100
+    batch_size = 20
     grid_size = 4
 
-    # Modèle DNL
-    model = Sequential()
-    model.add(Dense(hidden_size, input_shape=(grid_size**2,), activation='relu'))
-    model.add(Dense(hidden_size, activation='relu'))
-    model.add(Dense(num_actions, activation='softmax'))
-    model.compile(sgd(lr=.2), "mse")
+    for i in range(200):
+        # Modèle DNL
+        model = Sequential()
+        model.add(Dense(hidden_layer_size, input_shape=(grid_size**2,), activation='sigmoid'))
+        for i in range(nb_hidden_layer):
+            model.add(Dense(hidden_layer_size, activation='sigmoid'))
+        model.add(Dense(num_actions))
+        model.compile(sgd(lr=.2), "mse")
 
-    # If you want to continue training from a previous model, just uncomment the line bellow
-    model.load_weights("model_2048.h5")
+        # If you want to continue training from a previous model, just uncomment the line bellow
+        try:
+            model.load_weights("model_2048_{}_{}.h5".format(nb_hidden_layer, hidden_layer_size))
+            pass
+        except OSError as err:
+            print("Nouvelle architecture de modèle :")
+        print("Nombre de couches total = {} (dont {} cachées)\n"
+        "Nombre de neurones par couche = {}".format(
+        nb_hidden_layer + 2, nb_hidden_layer, hidden_layer_size))
+        # Initialize experience replay object
+        exp_replay = ExperienceReplay(max_memory=max_memory)
 
-    # Define environment/game
-    #env = Catch(grid_size)
-    env = jeu_2048.Game()
+        # Train
+        for e in range(epoch):
+            loss = 0.
+            max_tile = 0
+            game_over = False
 
-    # Initialize experience replay object
-    exp_replay = ExperienceReplay(max_memory=max_memory)
+            # Define environment/game
+            env = jeu_2048.Game()
+            # get initial input
+            input_t = env.observe()
 
-    # Train
-    win_cnt = 0
-    for e in range(epoch):
-        loss = 0.
-        #env.reset()
-        game_over = False
-        # get initial input
-        input_t = env.observe()
+            while not game_over:
+                input_tm1 = input_t
+                # get next action
+                if np.random.rand() <= epsilon: # Curiosité
+                    action = np.random.randint(0, num_actions, size=1)
+                else:
+                    q = model.predict(input_tm1)
+                    action = np.argmax(q[0])
 
-        while not game_over:
-            input_tm1 = input_t
-            # get next action
-            if np.random.rand() <= epsilon: # Curiosité
-                action = np.random.randint(0, num_actions, size=1)
-            else:
-                q = model.predict(input_tm1)
-                action = np.argmax(q[0])
+                # print("===========================")
+                # print(q)
+                # print("action :", ['Gauche', 'Haut', 'Droite', 'Bas'][int(action)], " (", action, ")")
+                # apply action, get rewards and new state
+                input_t, reward, game_over = env.act(action)
+                # print("reward :",reward)
+                # print(env.grid)
+                if game_over:
+                    max_tile = np.max(env.grid)
 
-            # apply action, get rewards and new state
-            input_t, reward, game_over = env.act(action)
-            #if reward == 1:
-            #    win_cnt += 1
+                # store experience
+                exp_replay.remember([input_tm1, action, reward, input_t], game_over)
 
-            # store experience
-            exp_replay.remember([input_tm1, action, reward, input_t], game_over)
+                # adapt model --> apprentissage (memory) ?
+                inputs, targets = exp_replay.get_batch(model, batch_size=batch_size)
+                # print(targets)
+                loss += model.train_on_batch(inputs, targets)#[0]
+            print("Epoch {:03d}/{} | Loss {:.4f} | Max tile {}".format(e+1, epoch, loss, max_tile))
 
-            # adapt model --> apprentissage (memory) ?
-            inputs, targets = exp_replay.get_batch(model, batch_size=batch_size)
-
-            loss += model.train_on_batch(inputs, targets)#[0]
-        print("Epoch {:03d}/{} | Loss {:.4f} | Win count {}".format(e+1, epoch, loss, win_cnt))
-
-    # Save trained model weights and architecture, this will be used by the visualization code
-    model.save_weights("model_2048.h5", overwrite=True)
-    with open("model_2048.json", "w") as outfile:
-        json.dump(model.to_json(), outfile)
+        # Save trained model weights and architecture, this will be used by the visualization code
+        model.save_weights("model_2048_{}_{}.h5".format(nb_hidden_layer, hidden_layer_size), overwrite=True)
+        with open("model_2048_{}_{}.json".format(nb_hidden_layer, hidden_layer_size), "w") as outfile:
+            json.dump(model.to_json(), outfile)
