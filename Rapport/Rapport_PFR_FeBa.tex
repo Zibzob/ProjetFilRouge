@@ -1,0 +1,121 @@
+% Tout ce qui est mis derrière un « % » n'est pas vu par LaTeX
+% On appelle cela des « commentaires ».  Les commentaires permettent de
+% commenter son document - comme ce que je suis en train de faire
+% actuellement - et de cacher du code - cf. la ligne \pagestyle.
+
+\documentclass[a4paper]{article}
+
+% Options possibles : 10pt, 11pt, 12pt (taille de la fonte)
+%                     oneside, twoside (recto simple, recto-verso)
+%                     draft, final (stade de développement)
+
+\usepackage[utf8]{inputenc}   % LaTeX, comprends les accents !
+\usepackage[T1]{fontenc}      % Police contenant les caractères français
+\usepackage[francais]{babel}  % Placez ici une liste de langues, la
+                              % dernière étant la langue principale
+
+\usepackage[a4paper]{geometry}% Réduire les marges
+% \pagestyle{headings}        % Pour mettre des entêtes avec les titres
+                              % des sections en haut de page
+
+\usepackage{graphicx}
+\usepackage{subcaption}
+
+\title{Projet Fil Rouge - Reinforcement Learning\\Un exemple simple
+d'application}           % Les paramètres du titre : titre, auteur, date
+\author{Antoine Barbosa \and Aurélien Febvre}
+
+
+\date{}                       % La date n'est pas requise (la date du
+                              % jour de compilation est utilisée en son
+			      % absence)
+
+\sloppy                       % Ne pas faire déborder les lignes dans la marge
+
+\begin{document}
+
+\maketitle                    % Faire un titre utilisant les données
+                              % passées à \title, \author et \date
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}
+  \includegraphics[width=\linewidth]{bob1.jpg}
+  \caption{A boat.}
+  \label{fig:boat1}
+\end{figure}
+
+Figure \ref{fig:boat1} shows a boat.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[h!]
+  \centering
+  \begin{subfigure}[b]{0.4\linewidth}
+    \includegraphics[width=\linewidth]{bob1.jpg}
+    \caption{Coffee.}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.4\linewidth}
+    \includegraphics[width=\linewidth]{bob2.jpg}
+    \caption{More coffee.}
+  \end{subfigure}
+  \caption{The same cup of coffee. Two times.}
+  \label{fig:coffee}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{abstract}
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Praesent semper orci
+et purus. Nulla eu felis in lacus mollis facilisis. Maecenas porta. Vestibulum
+ultricies, justo quis sodales molestie, nisi diam blandit arcu, eget egestas
+mauris enim a lectus. Phasellus ac dolor in augue venenatis vulputate. Praesent
+adipiscing. Aliquam adipiscing luctus ipsum. Vivamus non elit nec risus
+convallis lobortis. Vestibulum ante ipsum primis in faucibus orci luctus et
+ultrices posuere cubilia Curae; Nulla facilisi. Sed consequat pellentesque dui.
+\end{abstract}
+
+\tableofcontents              % Table des matières
+
+% \part{Titre}                % Commencer une partie...
+\usepackage{subcaption}
+\section{Donec}               % Commencer une section, etc.
+
+Donec nibh. Donec lorem odio, volutpat a, tempor et, interdum sed, eros.
+Suspendisse vulputate, velit ac rhoncus imperdiet, risus augue iaculis velit, et
+blandit libero dui quis turpis. Cras semper vulputate lectus. Morbi tempus
+semper augue.
+
+\subsection{Praesent}         % Section plus petite
+
+Praesent adipiscing nisi id augue consectetuer ultrices. Aenean hendrerit tortor
+quis magna condimentum accumsan. In a tortor. Fusce ut augue. Aenean interdum,
+metus sit amet mollis tincidunt, nunc sapien viverra sapien, in convallis leo
+diam sed nunc. Vivamus semper erat non leo. Vivamus ac ipsum eu velit convallis
+blandit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
+inceptos himenaeos.
+
+% \subsubsection{Titre}       % Encore plus petite
+
+\subsection{Quisque}
+
+Quisque dolor odio, aliquam quis, placerat sed, hendrerit eu, magna. Cras at
+turpis et mi imperdiet lobortis. Nam eu massa et eros congue gravida. Sed
+luctus. Nullam sit amet nunc a tellus lacinia tempor. Praesent tincidunt ligula
+quis lacus. Nullam sodales, mi sed venenatis egestas, risus turpis dictum elit,
+ac egestas augue eros eget erat. Cras faucibus.
+
+% \paragraph{Titre}           % Toutes petites sections (le nom \paragraph
+                              % n'est pas très bien choisi)
+
+% \subparagraph{Titre}        % La dernière
+
+% \appendix                   % Commençons les annexes
+
+% \section{Titre}             % Annexe A
+
+% \section{Titre}             % Annexe B
+
+% \listoffigures              % Table des figures
+
+% \listoftables               % Liste des tableaux
+
+\end{document}
+
