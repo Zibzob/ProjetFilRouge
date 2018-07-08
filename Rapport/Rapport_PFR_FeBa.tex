@@ -11,7 +11,7 @@
 
 \usepackage[utf8]{inputenc}   % LaTeX, comprends les accents !
 \usepackage[T1]{fontenc}      % Police contenant les caractères français
-\usepackage[francais]{babel}  % Placez ici une liste de langues, la
+\usepackage[english, frenchb]{babel}  % Placez ici une liste de langues, la
                               % dernière étant la langue principale
 
 \usepackage[a4paper]{geometry}% Réduire les marges
@@ -21,8 +21,8 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 
-\title{Projet Fil Rouge - Reinforcement Learning\\Un exemple simple
-d'application}           % Les paramètres du titre : titre, auteur, date
+\title{Projet Fil Rouge - Reinforcement Learning\\Développement d'une IA pour
+       le jeu 2048}           % Les paramètres du titre : titre, auteur, date
 \author{Antoine Barbosa \and Aurélien Febvre}
 
 
@@ -37,16 +37,69 @@ d'application}           % Les paramètres du titre : titre, auteur, date
 \maketitle                    % Faire un titre utilisant les données
                               % passées à \title, \author et \date
 
+
+\begin{abstract}
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Praesent semper orci
+et purus. Nulla eu felis in lacus mollis facilisis. Maecenas porta. Vestibulum
+ultricies, justo quis sodales molestie, nisi diam blandit arcu, eget egestas
+mauris enim a lectus. Phasellus ac dolor in augue venenatis vulputate. Praesent
+adipiscing. Aliquam adipiscing luctus ipsum. Vivamus non elit nec risus
+convallis lobortis. Vestibulum ante ipsum primis in faucibus orci luctus et
+ultrices posuere cubilia Curae; Nulla facilisi. Sed consequat pellentesque dui.
+\end{abstract}
+
+\tableofcontents              % Table des matières
+\pagebreak
+
+% Commencer une partie...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Introduction - Etat de l'art}
+
+Dans cette partie, nous introduisons le domaine de l'apprentissage par
+renforcement ("reinforcement learning") dans ses grandes lignes, avant de
+rentrer plus dans les détails dans la partie suivante.
+
+% Commencer une section, etc.
+\section{Un peu d'histoire}
+
+
+% Section plus petite
+\subsection{Praesent}
+
+Praesent adipiscing nisi id augue consectetuer ultrices. Aenean hendrerit tortor
+
+% Encore plus petite
+\subsubsection{Titre}
+
+\subsection{Quisque}
+
+Quisque dolor odio, aliquam quis, placerat sed, hendrerit eu, magna. Cras at
+
+% Toutes petites sections (le nom \paragraph n'est pas très bien choisi)
+\paragraph{Titre}
+Quisque dolor odio, aliquam quis, placerat sed, hendrerit eu, magna. Cras at
+turpis et mi imperdiet lobortis. Nam eu massa et eros congue gravida. Sed
+
+% La dernière
+\subparagraph{Titre}
+Quisque dolor odio, aliquam quis, placerat sed, hendrerit eu, magna. Cras at
+turpis et mi imperdiet lobortis. Nam eu massa et eros congue gravida. Sed
+
+% Commencer une section, etc.
+\section{Où on est}
+
+% Commencer une section, etc.
+\section{Où on va (peut-être ?)}
+
 \begin{figure}
-  \includegraphics[width=\linewidth]{bob1.jpg}
+  %\includegraphics[height=\linewidth]{bob1.jpg}
+  \includegraphics[height=8cm]{bob1.jpg}
   \caption{A boat.}
   \label{fig:boat1}
 \end{figure}
 
 Figure \ref{fig:boat1} shows a boat.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[h!]
   \centering
   \begin{subfigure}[b]{0.4\linewidth}
@@ -60,52 +113,27 @@ Figure \ref{fig:boat1} shows a boat.
   \caption{The same cup of coffee. Two times.}
   \label{fig:coffee}
 \end{figure}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Bases théoriques}
+\section{}
+\subsection{Titre}
+\subsubsection{Titre}
+\paragraph{Titre}
+\subparagraph{Titre}
 
-\begin{abstract}
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Praesent semper orci
-et purus. Nulla eu felis in lacus mollis facilisis. Maecenas porta. Vestibulum
-ultricies, justo quis sodales molestie, nisi diam blandit arcu, eget egestas
-mauris enim a lectus. Phasellus ac dolor in augue venenatis vulputate. Praesent
-adipiscing. Aliquam adipiscing luctus ipsum. Vivamus non elit nec risus
-convallis lobortis. Vestibulum ante ipsum primis in faucibus orci luctus et
-ultrices posuere cubilia Curae; Nulla facilisi. Sed consequat pellentesque dui.
-\end{abstract}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Application au 2048}
+\section{Titre}
+\subsection{Titre}
+\subsubsection{Titre}
+\paragraph{Titre}
+\subparagraph{Titre}
 
-\tableofcontents              % Table des matières
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{Résultats et conclusion}
 
-% \part{Titre}                % Commencer une partie...
-\usepackage{subcaption}
-\section{Donec}               % Commencer une section, etc.
 
-Donec nibh. Donec lorem odio, volutpat a, tempor et, interdum sed, eros.
-Suspendisse vulputate, velit ac rhoncus imperdiet, risus augue iaculis velit, et
-blandit libero dui quis turpis. Cras semper vulputate lectus. Morbi tempus
-semper augue.
-
-\subsection{Praesent}         % Section plus petite
-
-Praesent adipiscing nisi id augue consectetuer ultrices. Aenean hendrerit tortor
-quis magna condimentum accumsan. In a tortor. Fusce ut augue. Aenean interdum,
-metus sit amet mollis tincidunt, nunc sapien viverra sapien, in convallis leo
-diam sed nunc. Vivamus semper erat non leo. Vivamus ac ipsum eu velit convallis
-blandit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-inceptos himenaeos.
-
-% \subsubsection{Titre}       % Encore plus petite
-
-\subsection{Quisque}
-
-Quisque dolor odio, aliquam quis, placerat sed, hendrerit eu, magna. Cras at
-turpis et mi imperdiet lobortis. Nam eu massa et eros congue gravida. Sed
-luctus. Nullam sit amet nunc a tellus lacinia tempor. Praesent tincidunt ligula
-quis lacus. Nullam sodales, mi sed venenatis egestas, risus turpis dictum elit,
-ac egestas augue eros eget erat. Cras faucibus.
-
-% \paragraph{Titre}           % Toutes petites sections (le nom \paragraph
-                              % n'est pas très bien choisi)
-
-% \subparagraph{Titre}        % La dernière
 
 % \appendix                   % Commençons les annexes
 
