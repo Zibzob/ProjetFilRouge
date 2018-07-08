@@ -44,6 +44,8 @@ def plot_heat(data):
     except AttributeError:
         plt.show()
 
+# RL algo evaluation tool : criterion to assess algo efficiency
+def 
 ###############################################################################
 # Environment
 #####################
@@ -310,7 +312,7 @@ def MC_ES(pi, env, epoch, bool_plot=False):
 
     return q
 
-##################### Temporal Difference (TD)
+##################### In between : SARSA, Q-learning, TD(lambda)
 # n step TD - SARSA
 def n_step_SARSA(n, epoch, q_file_name, gama=1.0, alpha=0.2, epsilon=0.1, bool_plot=False):
     """N step SARSA prevision/control on policy method. """
@@ -379,8 +381,78 @@ def n_step_SARSA(n, epoch, q_file_name, gama=1.0, alpha=0.2, epsilon=0.1, bool_p
 
     return q
 
-##################### In between : SARSA, Q-learning, TD(lambda)
+# chapter 12
 def TD_lambda(env, model_file_name=None, epoch=10, epsilon=0.1, alpha=0.3, lam=5, gama=0.8,
+              num_actions=4, bool_plot=False):
+    """Evalue q value, TDlambda method"""
+
+    # TD_lambda : total return of the lambda-long sequence
+    def Gt_lam(mem_bis):
+        if len(mem_bis) == 1:
+            s, a, r, s1 = mem_bis.popleft()
+            x1, y1 = s1
+            a1 = np.argmax([q[x1, y1, ai] for ai in range(num_actions)])
+            res = r + gama*q[x1, y1, a1]
+            mem_bis.appendleft((s, a, r, s1))
+            return res
+        else:
+            s, a, r, s1 = mem_bis.popleft()
+            res = r + gama*Gt_lam(mem_bis)
+            mem_bis.appendleft((s, a, r, s1))
+            return res
+
+    # Initialisation de q(s, a)
+    n1, n2 = env.shape
+    try:
+        q = load_obj(model_file_name)
+        print("Poursuite training modèle existant")
+    except OSError as err:
+        print("Nouveau modèle")
+        q = np.zeros(shape=(n1, n2, num_actions))
+        x, y = env.end
+    # Joue plusieurs parties successives (pos initiale aléatoire) en mettant à 
+    # jour q
+    for i in range(epoch):
+        # Curiosity decay
+        #eps = epsilon / (i+1)**0.5
+        # Future doubt decay (gama --> 1)
+        gama = 1 - (1 - gama)*1/np.log(i+math.e)
+        # Initialisation partie et state
+        env.re_init()
+        s = env.pos
+        # Mémoire de lambda states successifs
+        mem = deque(maxlen=lam)
+        while not env.game_over:
+            x, y = s
+            curio = random() < eps
+            if curio:
+                # Curiosité
+                a = randint(0, num_actions-1)
+            else:
+                # Greed
+                a = np.argmax([q[x, y, action] for action in range(num_actions)])
+            r = env.move(a, bool_plot=bool_plot)
+            s1 = env.pos
+            mem.append((s, a, r, s1))
+
+            # Mise à jour modèle (des lambda states précédents) : learning, dès
+            # qu'on a une séquence complète (longueur lambda) ou fini la partie
+            mem_bis = mem.copy()
+            if len(mem_bis) == lam or env.game_over:
+                while len(mem_bis) != 0:
+                    gt = Gt_lam(mem_bis)
+                    s_maj, a_maj, r_maj, s1_maj = mem_bis[-1]
+                    x_maj, y_maj = s_maj
+                    # Quand curiosité, maj du modèle uniquement si ça améliore
+                    if not(curio and (gt - q[x_maj, y_maj, a_maj]) < 0):
+                        q[x_maj, y_maj, a_maj] = q[x_maj, y_maj, a_maj] + alpha*(gt - q[x_maj, y_maj, a_maj])
+                    mem_bis.popleft()
+
+            s = env.pos
+
+    return q
+
+def TD_lambda_old(env, model_file_name=None, epoch=10, epsilon=0.1, alpha=0.3, lam=5, gama=0.8,
               num_actions=4, bool_plot=False):
     """Evalue q value, TDlambda method"""
 
